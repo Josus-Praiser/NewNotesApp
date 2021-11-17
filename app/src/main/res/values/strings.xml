@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Notes App</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="tologin_txt_msg">Please Login to add/edit notes</string>
+    <string name="coverimage_txt">coverimage</string>
+    <string name="log_in_txt">Log In</string>
+    <string name="add_notes_btn">Add Notes</string>
+    <string name="no_notes_txt">You do not have any Notes.
+        Click the add button below to add notes</string>
+</resources>
