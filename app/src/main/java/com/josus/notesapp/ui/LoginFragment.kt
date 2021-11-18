@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.Task
 import com.josus.notesapp.R
 import com.josus.notesapp.data.User
 import com.josus.notesapp.databinding.FragmentLoginBinding
+import com.josus.notesapp.util.ConnectionManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -57,18 +58,27 @@ class LoginFragment : Fragment() {
         val isLoggedIn = sPref.getBoolean("isLoggedIn", false)
          savedUser = sPref.getString("userName","")
 
-
         Log.d("loggedIn", "Logged In is $isLoggedIn")
-
+        if (ConnectionManager().checkConnectivity(requireContext())){
             if (isLoggedIn) {
                 // val savedUser = viewModel?.getUserDetails()?.value
                 goToNextScreen(savedUser!!)
             } else {
                 initGoogleSignInClient()
-                binding.btnLogin.setOnClickListener { signIn() }
+                binding.btnLogin.setOnClickListener {
+                    if (ConnectionManager().checkConnectivity(requireContext())){
+                        signIn()
+                    }
+                    else{
+                        showToast(noInternetMsg,0)
+                    }
+
+                }
             }
-
-
+        }
+        else{
+            showToast(noInternetMsg,0)
+        }
     }
 
     private fun signIn() {
@@ -113,7 +123,7 @@ class LoginFragment : Fragment() {
 
                 }
             } catch (e: ApiException) {
-                Toast.makeText(requireContext(), "Error: $e", Toast.LENGTH_LONG).show()
+                showToast(e.toString(),1)
             }
         }
     }
@@ -135,6 +145,10 @@ class LoginFragment : Fragment() {
 
     companion object {
         const val RC_SIGN_IN = 123
+        const val noInternetMsg = "No Internet Found"
+    }
+    private fun showToast(msg:String,dur:Int){
+        Toast.makeText(requireContext(),msg,dur).show()
     }
 
 }

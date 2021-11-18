@@ -21,6 +21,7 @@ import com.josus.notesapp.R
 import com.josus.notesapp.adapter.NotesAdapter
 import com.josus.notesapp.data.UserWithNotes
 import com.josus.notesapp.databinding.FragmentHomeBinding
+import com.josus.notesapp.util.ConnectionManager
 
 class HomeFragment : Fragment() {
 
@@ -33,6 +34,7 @@ class HomeFragment : Fragment() {
     lateinit var sPref: SharedPreferences
     private var mGoogleSignInClient: GoogleSignInClient? = null
     val args: HomeFragmentArgs by navArgs()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,13 +79,17 @@ class HomeFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.logout_option -> {
-            sPref.edit().putBoolean("isLoggedIn", false).apply()
-            try {
-                signOut()
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Some Error: $e", Toast.LENGTH_LONG).show()
+            if (ConnectionManager().checkConnectivity(requireContext())){
+                sPref.edit().putBoolean("isLoggedIn", false).apply()
+                try {
+                    signOut()
+                } catch (e: Exception) {
+                    showToast(e.toString(),1)
+                }
             }
-
+            else{
+                showToast(noInternetMsg,0)
+            }
             true
         }
         else -> {
@@ -190,18 +196,36 @@ class HomeFragment : Fragment() {
     }
 
     private fun signOut() {
-        mGoogleSignInClient?.signOut()
-            ?.addOnCompleteListener(requireActivity(), OnCompleteListener {
-                goToLoginScreen()
-            })
+        if (ConnectionManager().checkConnectivity(requireContext())){
+            mGoogleSignInClient?.signOut()
+                ?.addOnCompleteListener(requireActivity(), OnCompleteListener {
+                    goToLoginScreen()
+                })
+        }
+        else{
+            showToast(noInternetMsg,0)
+        }
+
     }
 
     private fun initGoogleSignInClient() {
-        val googleSignInOptions =
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build()
-        mGoogleSignInClient = GoogleSignIn.getClient(requireContext(), googleSignInOptions)
+        if (ConnectionManager().checkConnectivity(requireContext())){
+            val googleSignInOptions =
+                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .build()
+            mGoogleSignInClient = GoogleSignIn.getClient(requireContext(), googleSignInOptions)
+        }
+        else{
+            showToast(noInternetMsg,0)
+        }
+
     }
 
+    private fun showToast(msg:String,dur:Int){
+        Toast.makeText(requireContext(),msg,dur).show()
+    }
+    companion object {
+        const val noInternetMsg = "No Internet Found"
+    }
 }
