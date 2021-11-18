@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -20,6 +21,10 @@ import com.google.android.gms.tasks.Task
 import com.josus.notesapp.R
 import com.josus.notesapp.data.User
 import com.josus.notesapp.databinding.FragmentLoginBinding
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -27,10 +32,12 @@ class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-    var viewModel : MainViewModel? = null
+    var viewModel: MainViewModel? = null
 
     private var mGoogleSignInClient: GoogleSignInClient? = null
-    lateinit var sPref:SharedPreferences
+    lateinit var sPref: SharedPreferences
+    private var savedUser :String? =""
+    var job: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,20 +53,25 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = (activity as MainActivity).mainViewModel
-        val sPref=requireActivity().getSharedPreferences("Login",Context.MODE_PRIVATE)
-        val isLoggedIn=sPref.getBoolean("isLoggedIn",false)
-        Log.d("loggedIn","Logged In is $isLoggedIn")
-        if (isLoggedIn){
-            val savedUser = viewModel?.getUserDetails()?.value
-            goToNextScreen(savedUser)
-        }
-        else  {
-            initGoogleSignInClient()
-            binding.btnLogin.setOnClickListener {signIn()}
-        }
+        val sPref = requireActivity().getSharedPreferences("Login", Context.MODE_PRIVATE)
+        val isLoggedIn = sPref.getBoolean("isLoggedIn", false)
+         savedUser = sPref.getString("userName","")
+
+
+        Log.d("loggedIn", "Logged In is $isLoggedIn")
+
+            if (isLoggedIn) {
+                // val savedUser = viewModel?.getUserDetails()?.value
+                goToNextScreen(savedUser!!)
+            } else {
+                initGoogleSignInClient()
+                binding.btnLogin.setOnClickListener { signIn() }
+            }
+
+
     }
 
-   private fun signIn(){
+    private fun signIn() {
         val signInIntent = mGoogleSignInClient!!.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
     }
@@ -69,42 +81,55 @@ class LoginFragment : Fragment() {
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build()
-        mGoogleSignInClient = GoogleSignIn.getClient(requireContext(),googleSignInOptions)
+        mGoogleSignInClient = GoogleSignIn.getClient(requireContext(), googleSignInOptions)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_SIGN_IN){
-            val task:Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
+        if (requestCode == RC_SIGN_IN) {
+            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
-                val googleSignInAccount : GoogleSignInAccount? =
+                val googleSignInAccount: GoogleSignInAccount? =
                     task.getResult(ApiException::class.java)
                 googleSignInAccount?.let {
-                    if (it.isExpired){
-                        Toast.makeText(requireContext(),"Something Went wrong",Toast.LENGTH_LONG).show()
-                    }
-                    else{
-                        sPref = requireContext().getSharedPreferences("Login",Context.MODE_PRIVATE)
-                        sPref.edit().putBoolean("isLoggedIn",true)
-                            .apply()
-                        val user = User(null,it.displayName!!)
-                        viewModel?.saveUserDetails(user)
-                        val savedUser = viewModel?.getUserDetails()?.value
-                        goToNextScreen(savedUser)
-                    }
+                    sPref = requireContext().getSharedPreferences("Login", Context.MODE_PRIVATE)
+                    sPref.edit().putBoolean("isLoggedIn", true)
+                        .apply()
+
+                    val userName = it.id!!
+                    viewModel?.getUserDetails(userName)?.observe(viewLifecycleOwner, Observer { user->
+                        if (user == null){
+                            sPref.edit().putString("userName",it.id).apply()
+                            val id = Random().nextInt()
+                            val newUser = User(id,userName,false,it.givenName!!)
+                            viewModel?.saveUserDetails(newUser)
+                            goToNextScreen(userName)
+                        }
+                        else{
+                            goToNextScreen(user.userName)
+                        }
+                    })
+
                 }
-            }
-            catch (e:ApiException){
-                Toast.makeText(requireContext(),"Error: $e",Toast.LENGTH_LONG).show()
+            } catch (e: ApiException) {
+                Toast.makeText(requireContext(), "Error: $e", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun goToNextScreen(savedUser:User?){
-        val bundle = Bundle().apply {
-            putSerializable("user",savedUser)
+    private fun goToNextScreen(userName:String) {
+        job?.cancel()
+        job = MainScope().launch {
+            delay(500L)
+            viewModel?.getUserDetails(userName)?.observe(viewLifecycleOwner, Observer { user ->
+                val bundle = Bundle().apply {
+                    putSerializable("user", user)
+                }
+                findNavController().navigate(R.id.action_loginFragment_to_homeFragment, bundle)
+            })
         }
-        findNavController().navigate(R.id.action_loginFragment_to_homeFragment,bundle)
+
+
     }
 
     companion object {
@@ -112,7 +137,6 @@ class LoginFragment : Fragment() {
     }
 
 }
-
 
 
 //For activity

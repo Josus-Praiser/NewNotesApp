@@ -26,6 +26,9 @@
             android:name="user"
             app:argType="com.josus.notesapp.data.User"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_homeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/addNotesFragment"
@@ -35,5 +38,13 @@
         <action
             android:id="@+id/action_addNotesFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <argument
+            android:name="user"
+            app:argType="com.josus.notesapp.data.User"
+            app:nullable="true" />
+        <argument
+            android:name="notes"
+            app:argType="com.josus.notesapp.data.Notes"
+            app:nullable="true" />
     </fragment>
 </navigation>

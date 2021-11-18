@@ -2,6 +2,8 @@ package com.josus.notesapp.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
+import java.util.*
 
 @Entity(tableName = "notes")
 data class Notes(
@@ -10,4 +12,4 @@ data class Notes(
     val title : String,
     val description : String,
     val userId:Int
-)
+) : Serializable

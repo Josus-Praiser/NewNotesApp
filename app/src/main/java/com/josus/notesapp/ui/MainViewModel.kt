@@ -10,6 +10,7 @@ import com.josus.notesapp.data.UserWithNotes
 import com.josus.notesapp.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 class MainViewModel(private val userRepository: UserRepository) : ViewModel()
@@ -17,11 +18,11 @@ class MainViewModel(private val userRepository: UserRepository) : ViewModel()
 
 
 
-      fun saveUserDetails(user:User) = viewModelScope.launch {
-          userRepository.upsert(user)
-     }
+      fun saveUserDetails(user:User) = viewModelScope.launch {userRepository.upsert(user)  }
 
-     fun getUserDetails() = userRepository.getUserDetails()
+
+     fun getUserDetails(userName:String) = userRepository.getUserDetails(userName)
+
 
     fun upsertNotes(notes:Notes) = viewModelScope.launch {
         userRepository.upsertNotes(notes)
@@ -30,4 +31,8 @@ class MainViewModel(private val userRepository: UserRepository) : ViewModel()
    fun getAllNotes(userId:Int) :LiveData<List<UserWithNotes>> {
        return userRepository.getAllNotes(userId)
    }
+
+    fun deleteNotes(notes:Notes) = viewModelScope.launch {
+        userRepository.deleteNotes(notes)
+    }
 }

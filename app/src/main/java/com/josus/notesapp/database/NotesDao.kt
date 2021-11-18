@@ -6,6 +6,7 @@ import androidx.room.*
 import com.josus.notesapp.data.Notes
 import com.josus.notesapp.data.UserWithNotes
 import kotlinx.coroutines.flow.Flow
+import java.util.*
 
 @Dao
 interface NotesDao {
@@ -15,6 +16,9 @@ interface NotesDao {
 
 
     @Transaction
-    @Query("SELECT * FROM userDetails WHERE userId = :userId ")
+    @Query("SELECT * FROM userDetails WHERE userId = :userId")
     fun getAllNotes(userId:Int) : LiveData<List<UserWithNotes>>
+
+    @Delete
+    suspend fun deleteNotes(notes:Notes)
 }
