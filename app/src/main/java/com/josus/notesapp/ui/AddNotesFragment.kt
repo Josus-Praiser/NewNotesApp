@@ -1,5 +1,7 @@
 package com.josus.notesapp.ui
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -20,6 +22,8 @@ class AddNotesFragment : Fragment() {
     private val binding get() = _binding!!
     private var viewModel:MainViewModel?=null
     val args : AddNotesFragmentArgs by navArgs()
+    lateinit var sPref: SharedPreferences
+    var userName:String =""
 
 
     override fun onCreateView(
@@ -36,18 +40,20 @@ class AddNotesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = (activity as MainActivity).mainViewModel
+        sPref = requireActivity().getSharedPreferences("Login", Context.MODE_PRIVATE)
+       userName=sPref.getString("userName","")!!
         if (args.notes?.equals(null) == false){
             setUpEditTexts(args.notes)
         }
         else{
-            initObservers(args.user)
+            initObservers(userName)
         }
     }
 
 
-    private fun initObservers(userR: User?){
+    private fun initObservers(userName:String){
 
-        viewModel?.getUserDetails(userR?.userName!!)?.observe(viewLifecycleOwner, Observer { user->
+        viewModel?.getUserDetails(userName)?.observe(viewLifecycleOwner, Observer { user->
             val userId = user.userId
             binding.saveNotesFab.setOnClickListener {
                 val notesTitle = binding.etNotesTitle.text.toString()
@@ -72,7 +78,7 @@ class AddNotesFragment : Fragment() {
             binding.etNotesTitle.setText(notes.title)
             binding.etNotesDescription.setText(notes.description)
         }
-        viewModel?.getUserDetails(args.user?.userName!!)?.observe(viewLifecycleOwner, Observer { user->
+        viewModel?.getUserDetails(userName)?.observe(viewLifecycleOwner, Observer { user->
             val userId = user.userId
             binding.saveNotesFab.setOnClickListener {
                 val notesTitle = binding.etNotesTitle.text.toString()
