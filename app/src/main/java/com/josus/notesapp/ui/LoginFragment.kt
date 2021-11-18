@@ -106,6 +106,7 @@ class LoginFragment : Fragment() {
                             goToNextScreen(userName)
                         }
                         else{
+                            sPref.edit().putString("userName",user.userName).apply()
                             goToNextScreen(user.userName)
                         }
                     })
@@ -137,8 +138,3 @@ class LoginFragment : Fragment() {
     }
 
 }
-
-
-//For activity
-// private lateinit var binding: ActivityLoginBinding
-//binding = DataBindingUtil.setContentView(this, R.layout.activity_login) - inside onCreate
