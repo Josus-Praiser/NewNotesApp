@@ -7,6 +7,7 @@ import android.view.MenuInflater
 import androidx.lifecycle.ViewModelProvider
 import com.josus.notesapp.R
 import com.josus.notesapp.database.LocalDatabase
+import com.josus.notesapp.database.LocalDatabaseHelper
 import com.josus.notesapp.repository.UserRepository
 
 class MainActivity : AppCompatActivity() {
@@ -17,7 +18,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val userRepository = UserRepository(LocalDatabase(this))
+        val userRepository = UserRepository(LocalDatabase(this), LocalDatabaseHelper(this))
         val viewModelProviderFactory = MainViewModelProviderFactory(userRepository)
 
         mainViewModel = ViewModelProvider(this,viewModelProviderFactory).get(MainViewModel::class.java)

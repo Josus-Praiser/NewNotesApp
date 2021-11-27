@@ -4,9 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.josus.notesapp.data.Notes
-import com.josus.notesapp.data.User
-import com.josus.notesapp.data.UserWithNotes
+import com.josus.notesapp.data.*
 import com.josus.notesapp.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -35,4 +33,12 @@ class MainViewModel(private val userRepository: UserRepository) : ViewModel()
     fun deleteNotes(notes:Notes) = viewModelScope.launch {
         userRepository.deleteNotes(notes)
     }
+
+    fun addUser(user:UserN) = viewModelScope.launch { userRepository.addUser(user) }
+
+ fun getUser(userId:String) = viewModelScope.launch { userRepository.getUser(userId) }
+
+    fun insertNotes(notes:NotesN) = userRepository.insertNotes(notes)
+
+    fun getAllNotesN(userId:String) = userRepository.getAllNotesN(userId)
 }

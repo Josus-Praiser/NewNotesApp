@@ -36,7 +36,6 @@ class HomeFragment : Fragment() {
     val args: HomeFragmentArgs by navArgs()
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -60,9 +59,17 @@ class HomeFragment : Fragment() {
         sPref = requireActivity().getSharedPreferences("Login", Context.MODE_PRIVATE)
         val savedUser = args.user?.userName!!
         viewModel?.getUserDetails(savedUser)?.observe(viewLifecycleOwner, Observer {
-            binding.userId.text = getString(R.string.userName_txt,it.userN)
+            binding.userId.text = getString(R.string.userName_txt, it.userN)
             initObservers(it.userId)
         })
+
+        /*
+        val user =viewModel?.getUser(savedUser)
+        binding.userId.text = getString(R.string.userName_txt,user?.userName)
+        initObservers(user?.userId!!)
+         */
+
+
 
         binding.addNotesFab.setOnClickListener {
             goToNextScreen(savedUser)
@@ -79,16 +86,15 @@ class HomeFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.logout_option -> {
-            if (ConnectionManager().checkConnectivity(requireContext())){
+            if (ConnectionManager().checkConnectivity(requireContext())) {
                 sPref.edit().putBoolean("isLoggedIn", false).apply()
                 try {
                     signOut()
                 } catch (e: Exception) {
-                    showToast(e.toString(),1)
+                    showToast(e.toString(), 1)
                 }
-            }
-            else{
-                showToast(noInternetMsg,0)
+            } else {
+                showToast(noInternetMsg, 0)
             }
             true
         }
@@ -111,16 +117,6 @@ class HomeFragment : Fragment() {
 
     private fun initObservers(userId: Int) {
 
-        /*
-           if (userId.equals(null)) {
-            binding.noNotesTxt.visibility = View.VISIBLE
-            binding.notesRecyclerView.visibility = View.GONE
-            binding.userId.visibility = View.GONE
-        } else {
-
-        }
-         */
-
         try {
             viewModel?.getAllNotes(userId)?.observe(viewLifecycleOwner, Observer { notes ->
                 if (notes == null || notes.isEmpty() || notes[0].notes.isEmpty()) {
@@ -130,7 +126,6 @@ class HomeFragment : Fragment() {
                     binding.noNotesTxt.visibility = View.GONE
                     binding.notesRecyclerView.visibility = View.VISIBLE
                     setUpRecyclerView(notes)
-                    Toast.makeText(requireContext(),"Swipe notes to Delete",Toast.LENGTH_LONG).show()
                     notesAdapter.setOnItemClickListener {
                         val bundle = Bundle().apply {
                             putSerializable("user", null)
@@ -150,6 +145,20 @@ class HomeFragment : Fragment() {
             binding.noNotesTxt.text = e.toString()
         }
 
+        /*
+         val notesList = viewModel?.getAllNotesN(userId)
+        if (notesList == null){
+            binding.noNotesTxt.visibility = View.VISIBLE
+            binding.notesRecyclerView.visibility = View.GONE
+        }
+        else{
+            binding.noNotesTxt.visibility = View.GONE
+            binding.notesRecyclerView.visibility = View.VISIBLE
+            setUpRecyclerView(notesList)
+        }
+         */
+
+
     }
 
     private fun setUpRecyclerView(data: List<UserWithNotes>) {
@@ -160,6 +169,7 @@ class HomeFragment : Fragment() {
             notesAdapter.differ.submitList(data.first().notes)
         }
     }
+
 
     private fun onItemSwiped(view: View) {
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
@@ -196,35 +206,34 @@ class HomeFragment : Fragment() {
     }
 
     private fun signOut() {
-        if (ConnectionManager().checkConnectivity(requireContext())){
+        if (ConnectionManager().checkConnectivity(requireContext())) {
             mGoogleSignInClient?.signOut()
                 ?.addOnCompleteListener(requireActivity(), OnCompleteListener {
                     goToLoginScreen()
                 })
-        }
-        else{
-            showToast(noInternetMsg,0)
+        } else {
+            showToast(noInternetMsg, 0)
         }
 
     }
 
     private fun initGoogleSignInClient() {
-        if (ConnectionManager().checkConnectivity(requireContext())){
+        if (ConnectionManager().checkConnectivity(requireContext())) {
             val googleSignInOptions =
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
                     .build()
             mGoogleSignInClient = GoogleSignIn.getClient(requireContext(), googleSignInOptions)
-        }
-        else{
-            showToast(noInternetMsg,0)
+        } else {
+            showToast(noInternetMsg, 0)
         }
 
     }
 
-    private fun showToast(msg:String,dur:Int){
-        Toast.makeText(requireContext(),msg,dur).show()
+    private fun showToast(msg: String, dur: Int) {
+        Toast.makeText(requireContext(), msg, dur).show()
     }
+
     companion object {
         const val noInternetMsg = "No Internet Found"
     }

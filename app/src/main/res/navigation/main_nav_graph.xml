@@ -22,13 +22,13 @@
         <action
             android:id="@+id/action_homeFragment_to_addNotesFragment"
             app:destination="@id/addNotesFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
         <argument
             android:name="user"
             app:argType="com.josus.notesapp.data.User"
             app:nullable="true" />
-        <action
-            android:id="@+id/action_homeFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/addNotesFragment"

@@ -20,6 +20,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.josus.notesapp.R
 import com.josus.notesapp.data.User
+import com.josus.notesapp.data.UserN
 import com.josus.notesapp.databinding.FragmentLoginBinding
 import com.josus.notesapp.util.ConnectionManager
 import kotlinx.coroutines.Job
@@ -121,6 +122,23 @@ class LoginFragment : Fragment() {
                         }
                     })
 
+
+
+                    /*
+                      viewModel?.getUser(userName)
+                    if (sUser == null){
+                        sPref.edit().putString("userName",it.id).apply()
+                        val id = Random().nextInt()
+                        val newUser = UserN(userName,it.givenName!!)
+                        viewModel?.addUser(newUser)
+                        goToNextScreen(userName)
+                    }
+                    else{
+                        sPref.edit().putString("userName",sUser.userName).apply()
+                        goToNextScreen(sUser.userName)
+                    }
+                     */
+
                 }
             } catch (e: ApiException) {
                 showToast(e.toString(),1)
@@ -129,7 +147,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun goToNextScreen(userName:String) {
-        job?.cancel()
+            job?.cancel()
         job = MainScope().launch {
             delay(500L)
             viewModel?.getUserDetails(userName)?.observe(viewLifecycleOwner, Observer { user ->
@@ -139,6 +157,16 @@ class LoginFragment : Fragment() {
                 findNavController().navigate(R.id.action_loginFragment_to_homeFragment, bundle)
             })
         }
+
+
+/*
+  val savedUser = viewModel?.getUser(userName)
+        val bundle = Bundle().apply {
+            putSerializable("user", savedUser)
+        }
+        findNavController().navigate(R.id.action_loginFragment_to_homeFragment,bundle)
+ */
+
 
 
     }

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.josus.notesapp.R
 import com.josus.notesapp.data.Notes
+import com.josus.notesapp.data.NotesN
 import com.josus.notesapp.data.UserWithNotes
 import kotlinx.android.synthetic.main.item_notes.view.*
 
